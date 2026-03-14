@@ -1,0 +1,108 @@
+agrparse log_filter, et choix par défaut, docker pas clé API dedans,/!\ plus load_dotenv 
+
+
+| Niveau | Nom         | Description                    |
+| ------ | ----------- | ------------------------------ |
+| 0      | **emerg**   | Urgence : système inutilisable |
+| 1      | **alert**   | Action immédiate requise       |
+| 2      | **crit**    | Condition critique             |
+| 3      | **err**     | Erreur                         |
+| 4      | **warning** | Avertissement                  |
+| 5      | **notice**  | Condition normale mais notable |
+| 6      | **info**    | Information                    |
+| 7      | **debug**   | Messages de debug              |
+
+
+analyser: choix d'un id et reponse supplémetaire, + model et choix par défaut modèle 
+
+
+Différence simple :
+
+🧪 Test unitaire
+
+Teste une fonction isolée.
+
+On ne dépend pas du reste du système.
+
+Exemple dans ton projet :
+
+def test_retrieved_Jctl_log():
+    result = retrieved_Jctl_log("6 hours ago", "warning")
+    assert isinstance(result, dict)
+
+Ici tu testes juste la fonction
+retrieved_Jctl_log().
+
+Tu ne testes ni l’API, ni le LLM, ni requests.
+
+➡️ objectif : vérifier que la logique interne fonctionne.
+
+🔗 Test d’intégration
+
+Teste plusieurs composants ensemble.
+
+Exemple chez toi :
+
+log_filter → API FastAPI → analyzer → LiteLLM
+
+Test :
+
+def test_send_to_api_analyzer():
+    response = send_to_api_analyer("test log")
+    assert response.status_code == 200
+
+Ici tu testes :
+
+requests
+
+ton API
+
+la route FastAPI
+
+la fonction analyze_log
+
+➡️ objectif : vérifier que tout fonctionne ensemble.
+
+🧠 Résumé simple
+Type	Teste	Exemple chez toi
+Unitaire	1 fonction	retrieved_Jctl_log()
+Intégration	plusieurs modules	send_to_api_analyer()
+E2E	toute l'app	log → API → LLM → réponse
+🎯 Dans ton projet
+
+Tu as déjà :
+
+✅ test unitaire
+
+retrieved_Jctl_log()
+
+✅ test d'intégration
+
+send_to_api_analyer()
+
+Donc tu fais exactement ce qu’on attend d’un vrai projet backend.
+
+
+
+
+
+Si Ne trouve pas le module, souvent dossier pas au pythonpath:
+
+command:
+
+PYTHONPATH=. pytest
+
+✅ Solution encore plus propre (utilisée en production)
+
+Créer un fichier pytest.ini
+
+app/pytest.ini
+
+contenu :
+
+[pytest]
+pythonpath = .
+
+Ensuite tu peux faire simplement :
+
+pytest
