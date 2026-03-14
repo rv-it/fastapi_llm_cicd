@@ -1,13 +1,11 @@
 
 from litellm import completion, AuthenticationError, RateLimitError, APIError 
-from dotenv import load_dotenv
 from fastapi import HTTPException
 import os
 
 
 def analyze_log(log_text: str):
-    api_key = os.getenv("api_key")
-    
+    api_key = os.getenv("api_key")    
     try:
         response = completion(
             model="gemini/gemini-2.5-flash",

@@ -1,19 +1,18 @@
-from log.log_filter import retrieved_Jctl_log, send_to_api_analyer
+from logs.log_filter import retrieved_Jctl_log
 
-def test_retrieved_Jctl_log():
-    result = retrieved_Jctl_log("6 hours ago", "info")
-    assert isinstance(result, dict)
-    for key in result.keys():
-        assert key.startswith("log")
+def test_retrieved_Jctl_log(mocker):
+    mock_log = mocker.Mock()
+    mock_log.stdout = """Nov 11 10:38:22 srv_lenny kernel: disaster in progress
+    Nov 12 08:37:50 srv_lenny systemd[1]: This isn't very good at all
+    Nov 12 08:40:50 srv_lenny systemd[1]: This isn't very good at all
+    Nov 12 08:42:50 srv_lenny systemd[1]: This isn't very good at all"""
 
-
-def test_send_to_api_analyer():
-    response = send_to_api_analyer("test")    
-    assert response is not None
-    assert response.json() is not None
-    assert response.status_code == 200
-
-
-
+    mocker.patch("logs.log_filter.subprocess.run", return_value=mock_log)
     
+    log_dic = retrieved_Jctl_log("", "")
+    assert isinstance(log_dic, dict)
+    assert len(log_dic) == 2
+    for key in log_dic.keys():
+        assert key.startswith("log ")
+
 
