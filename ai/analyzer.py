@@ -3,10 +3,11 @@ from litellm import completion, AuthenticationError, RateLimitError, APIError
 from fastapi import HTTPException
 import os
 
-
+# Function to send log text to the LLM and get the analysis result
 def analyze_log(log_text: str):
     api_key = os.getenv("api_key")    
     try:
+        # Send request to the LLM
         response = completion(
             model="gemini/gemini-2.5-flash",
             messages=[
@@ -17,10 +18,11 @@ def analyze_log(log_text: str):
             ],
             api_key=api_key
         )
+        # Return the model response content
         return response.choices[0].message.content
     
-    # si print(e) ça va s'afficher juste dans le terminal ou tourne uvicorn, pas dans le terminal ou est lancé le script (tout va semblé fonctionner comme l'API fast api marche).
-    # return e ça va afficher l'erreur mais garde code 200 (car l'api fonctionne c'est le backend Litellm qui merde), HTTPException pour gerer correctement les erreurs (doc fastapi)
+    
+    # Catch LiteLLM exception and raises FastApI Exception with LiteLLM Exception message
     except AuthenticationError as e:
         raise HTTPException(status_code=401, detail=str(e))
     
@@ -29,7 +31,7 @@ def analyze_log(log_text: str):
     
     except APIError as e:
         raise HTTPException(status_code=500, detail=str(e))
-    
+    # Catch any other exception
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))    
     

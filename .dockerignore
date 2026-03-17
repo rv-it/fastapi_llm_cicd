@@ -1,6 +1,7 @@
 __pycache__
 *.pyc
+call
 tests
-log
+logs
 for_me.txt
 cred.env
