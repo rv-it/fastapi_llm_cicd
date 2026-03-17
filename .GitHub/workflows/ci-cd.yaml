@@ -1,0 +1,57 @@
+name: CI/CD Pipeline
+
+permissions:
+  contents: read
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env: 
+      API_KEY: ${{ secrets.API_KEY }} 
+  
+    steps:
+      # transmit repo to the runner
+      - name: Checkout repository
+        uses: actions/checkout@0c366fd6a839edf440554fa01a7085ccba70ac98  # v6.0.2
+
+      - name: Install Python
+        uses: actions/setup-python@28f2168f4d98ee0445e3c6321f6e6616c83dd5ec # v6.2.0
+        with:
+          python-version: 3.12
+    
+      - name: Install dependencies 
+        run: |
+          python -m venv venv
+          source venv/bin/activate
+          pip install --upgrade pip
+          pip install -r requirement.txt
+
+      - name: run tests
+        run: |
+          source venv/bin/activate
+          pytest --maxfail=1 --disable-warnings -q
+        
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@bb0e4e1bb14abddfe1fa03905880f78116916327 # v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Build Docker image # crée une image local avec le tag voulu (dans le runner)
+        run: docker build -t fastapi-llm:v1 .
+
+      - name: Push Docker image on GHCR # met l'image dans le repo GHCR
+        run: docker push ghcr.io/${{ github.repository_owner }}/fastapi-llm:latest
+
+
+      - name: Deployment
+        run: echo "Deployment is handled on the Raspberry Pi via GHCR pull"
