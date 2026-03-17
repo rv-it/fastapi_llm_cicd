@@ -47,7 +47,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
       
       - name: Build Docker image # crée une image local avec le tag voulu (dans le runner)
-        run: docker build -t fastapi-llm:v1 .
+        run: docker build -t ghcr.io/${{ github.repository_owner }}/fastapi-llm:v1 .
 
       - name: Push Docker image on GHCR # met l'image dans le repo GHCR
         run: docker push ghcr.io/${{ github.repository_owner }}/fastapi-llm:latest
