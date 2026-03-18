@@ -15,7 +15,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env: 
-      api_key: ${{ secrets.API_KEY }} 
+      api_key: ${{ secrets.api_key }} 
   
     steps:
       # transmit repo to the runner
