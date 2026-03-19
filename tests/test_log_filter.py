@@ -1,4 +1,4 @@
-from logs.log_filter import retrieved_Jctl_log
+from client.log_filter import retrieved_Jctl_log
 
 # Test the retrieved_Jctl_log function with mocked journalctl output
 def test_retrieved_Jctl_log(mocker):
@@ -10,7 +10,7 @@ def test_retrieved_Jctl_log(mocker):
     Nov 12 08:42:50 srv_lenny systemd[1]: This isn't very good at all"""
 
     # Mock subprocess.run to return the fake logs
-    mocker.patch("logs.log_filter.subprocess.run", return_value=mock_log)
+    mocker.patch("client.log_filter.subprocess.run", return_value=mock_log)
 
     # Call the function
     log_dic = retrieved_Jctl_log("", "")

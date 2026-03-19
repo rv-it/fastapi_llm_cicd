@@ -1,9 +1,11 @@
-from logs.log_filter import retrieved_Jctl_log
+from client.log_filter import retrieved_Jctl_log
 import requests
 
+api_hots_ip = "192.168.1.105"
+
 # Function to send logs to the FastAPI analyzer endpoint
-def send_to_api_analyzer(log_ft):
-    url = "http://192.168.1.105:8000/analyzer"
+def send_log_to_api_analyzer(log_ft):
+    url = f"http://{api_hots_ip}:8000/analyzer"
     headers = {
         "Content-Type": "application/json"
     }
@@ -22,6 +24,26 @@ def send_to_api_analyzer(log_ft):
         print(e)
         # return the full response of the API
         return response
+    
+def send_mail_to_api(llm_response):
+    url = f"http://{api_hots_ip}:8000/mail"
+    headers = {
+        "Content-Type": "application/json"
+    }
+    payload = {
+        "content": llm_response,
+        "smtp_srv": "smtp.gmail.com",
+        "port": 587,
+        "receiver": "chrom_1@hotmail.fr"
+    }
+
+    try:
+        response = requests.post(url, headers=headers, json=payload)
+        response.raise_for_status()
+        return response
+    except requests.RequestException as e:
+        print(e)
+        return response
 
 # Main function to run the script
 def main():
@@ -31,10 +53,10 @@ def main():
     # Retrieve filtered logs
     logs_ft = retrieved_Jctl_log(time, severity)
     # Send logs to the API for analysis
-    response_ia = send_to_api_analyzer(logs_ft)
+    response_ia = send_log_to_api_analyzer(logs_ft)
     response_ia_json = response_ia.json()
-    print(response_ia.status_code)
-    print(response_ia_json)
+    mail = send_mail_to_api(response_ia_json)
+    print(mail)
 
 # This block runs only if the script is executed directly
 if __name__ == "__main__":

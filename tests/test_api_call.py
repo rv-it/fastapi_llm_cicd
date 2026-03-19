@@ -1,4 +1,4 @@
-from call.api_call import send_to_api_analyzer
+from client.api_call import send_to_api_analyzer
 
 # Test the send_to_api_analyzer function with a mocked API response
 def test_send_to_api_analyer(mocker):
@@ -7,7 +7,7 @@ def test_send_to_api_analyer(mocker):
     mock_response.status_code = 200
     mock_response.json.return_value = {"llm_resp": "ok"}
     # Mock the requests.post call to return the fake response
-    mocker.patch("call.api_call.requests.post", return_value=mock_response)
+    mocker.patch("client.api_call.requests.post", return_value=mock_response)
     
     # Call the function
     response = send_to_api_analyzer("test_log")
