@@ -2,9 +2,12 @@ from ai.analyzer import analyze_log
 from litellm import AuthenticationError, RateLimitError, APIError 
 from fastapi import HTTPException
 import pytest
+import os
 
 # Test the analyze_log function success
 def test_analyze_log(mocker):
+    # simulates api key
+    mocker.patch("ai.analyzer.os.getenv", return_value="fake_api_key")
     # Create a fake completion result with fake content ("ok")
     mock_response = mocker.Mock()
     mock_response.choices = [
@@ -21,6 +24,8 @@ def test_analyze_log(mocker):
 # These tests verify that analyze_log correctly handles exceptions from the LLM and converts them into HTTPException
 # Test authentication error handling
 def test_auth_err(mocker):
+    # simulates api key
+    mocker.patch("ai.analyzer.os.getenv", return_value="fake_api_key")
     # Mock the LLM call to raise an AuthenticationError
     mocker.patch("ai.analyzer.completion", side_effect=AuthenticationError(message="Key invalid", llm_provider="llm", model="model"))
     
@@ -34,6 +39,8 @@ def test_auth_err(mocker):
 
 # Test rate limit error handling
 def test_rate_err(mocker):
+    # simulates api key
+    mocker.patch("ai.analyzer.os.getenv", return_value="fake_api_key")    
     # Mock the LLM call to raise an RateLimitError
     mocker.patch("ai.analyzer.completion", side_effect=RateLimitError(message="Limit reached", llm_provider="llm", model="model"))
        
@@ -45,6 +52,8 @@ def test_rate_err(mocker):
 
 # Test generic API error handling
 def test_api_err(mocker):
+    # simulates api key
+    mocker.patch("ai.analyzer.os.getenv", return_value="fake_api_key")
     # Mock the LLM call to raise an APIError
     mocker.patch("ai.analyzer.completion", side_effect=APIError(message="Api error", status_code="500", llm_provider="llm", model="model"))
      
@@ -56,6 +65,8 @@ def test_api_err(mocker):
 
 # Test unexpected exception handling
 def test_other_err(mocker):
+    # simulates api key
+    mocker.patch("ai.analyzer.os.getenv", return_value="fake_api_key")
     # Mock the LLM call to raise unknown exception
     mocker.patch("ai.analyzer.completion", side_effect=Exception("Unexpected error"))
   
