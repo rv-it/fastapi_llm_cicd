@@ -1,31 +1,36 @@
 name: CI/CD Pipeline
 
+# Permissions to the GITHUB_TOKEN used in this workflow
 permissions:
-  contents: read
-  packages: write
+  contents: read   # allows reading the repository (required for checkout)
+  packages: write  # allows pushing Docker images to GHCR
 
+# Workflow triggers
 on:
   push:
     branches:
-      - main
+      - main    # triggers pipeline on every push to main
   pull_request:
     branches:
-      - main
+      - main    # runs checks before merging into main (PR validation)
 
 jobs:
   build:
+    # OS used by GitHub runner
     runs-on: ubuntu-latest
   
     steps:
-      # transmit repo to the runner
+      # transmit repository code into the runner
       - name: Checkout repository
         uses: actions/checkout@0c366fd6a839edf440554fa01a7085ccba70ac98  # v6.0.2
-
+      
+      # installs required Python version
       - name: Install Python
         uses: actions/setup-python@28f2168f4d98ee0445e3c6321f6e6616c83dd5ec # v6.2.0
         with:
           python-version: 3.12
-    
+
+      # create virtual environment + install dependencies
       - name: Install dependencies 
         run: |
           python -m venv venv
@@ -33,30 +38,39 @@ jobs:
           pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: run tests
+      # run automated tests
+      - name: run tests 
         run: |
           source venv/bin/activate
-          pytest --maxfail=1 --disable-warnings -q
-        
+          pytest --maxfail=1 -q
+      # --maxfail=1 : stop on first failure
+      # -q : quiet mode (clean logs)
+
+      # authenticate to GitHub Container Registry (GHCR)  
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@bb0e4e1bb14abddfe1fa03905880f78116916327 # v4
         with:
           registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          username: ${{ github.actor }}  # current GitHub user
+          password: ${{ secrets.GITHUB_TOKEN }}  # auto-generated GitHub token
       
-      - name: Set up QEMU # installe QEMU sur le runner pour émuler d’autres architectures (runner amd64)
+      # enables building images for other architectures (ARM, etc.)
+      - name: Set up QEMU # install QEMU on the runner to support other architectures (runner is amd64)
         uses: docker/setup-qemu-action@a3a541afbc519b40032fc3451382e369d05da204 # v3.7
 
-      - name: Set up Docker Buildx # pour builder des images multi-arch
+      # enables Docker Buildx (required for multi-arch builds)
+      - name: Set up Docker Buildx # Install BuildX to build multi-arch images
         uses: docker/setup-buildx-action@b278ce4ad9693f79d252f93570b663b9767e436b #v3.12.0
-
-      - name: Build and push multi-arch image # -- push -> vers le registre GHCR ou a été tagé l'image, . pour Dockerfile
+      
+      # build and push multi-architecture Docker image to GHCR
+      - name: Build and push multi-arch image with buildx
         run: |
           docker buildx build \
             --platform linux/amd64,linux/arm64 \
             -t ghcr.io/${{ github.repository_owner }}/fastapi-llm:latest \
             --push .
-
+        # -- push -> directly push to the GHCR where image has been tag (-t)
+      
+      # actual deployment handled externally
       - name: Deployment
-        run: echo "Deployment is handled on the Raspberry Pi via GHCR pull"
+        run: echo "Deployment is handled via the client script retrieved_container.sh (GHCR pull)"

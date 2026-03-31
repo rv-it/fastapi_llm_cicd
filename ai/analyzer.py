@@ -5,7 +5,11 @@ import os
 
 # Function to send log text to the LLM and get the analysis result
 def analyze_log(log_text: str, model: str):
-    api_key = os.getenv("api_key")    
+    api_key = os.getenv("api_key")
+
+    if not api_key:
+        raise ValueError("missing API key")
+        
     try:
         # Send request to the LLM
         response = completion(

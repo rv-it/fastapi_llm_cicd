@@ -1,9 +1,19 @@
 from client.log_filter import retrieved_Jctl_log
 import requests
 import sys
+from dotenv import load_dotenv
+import os
 
-api_hots_ip = "192.168.1.105"
-model = "gemini/gemini-2.5-flash"
+env_path = r"/home/rom1/app_v2/app/client/.env" 
+
+load_dotenv(env_path)
+
+api_hots_ip = os.getenv("api_hots_ip")
+model = os.getenv("model")
+smtp_srv = os.getenv("smtp_srv")
+port = os.getenv("port")
+sender = os.getenv("sender")
+receiver = os.getenv("receiver")
 
 # Function to send logs to the FastAPI analyzer endpoint
 def send_log_to_api_analyzer(log_ft):
@@ -39,10 +49,10 @@ def send_mail_to_api(llm_response):
     # Create the payload with mail parameters
     payload = {
         "content": llm_response,
-        "smtp_srv": "smtp.gmail.com",
-        "port": 587,
-        "sender": "romain.voisin13@gmail.com",
-        "receiver": "chrom_1@hotmail.fr"
+        "smtp_srv": smtp_srv,
+        "port": int(port),
+        "sender": sender,
+        "receiver": receiver
     }
 
     try:
@@ -56,7 +66,7 @@ def send_mail_to_api(llm_response):
 # Main function to run the script
 def main():
     # Define filters for retrieving logs
-    time = "25 days ago"
+    time = "30 days ago"
     severity = "warning"
     # Retrieve filtered and formatted logs
     logs_ft = retrieved_Jctl_log(time, severity)
