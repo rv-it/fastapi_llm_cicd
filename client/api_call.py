@@ -50,7 +50,7 @@ def send_mail_to_api(llm_response):
     payload = {
         "content": llm_response,
         "smtp_srv": smtp_srv,
-        "port": int(port),
+        "port": port,
         "sender": sender,
         "receiver": receiver
     }
